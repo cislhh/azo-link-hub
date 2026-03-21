@@ -31,6 +31,21 @@ export class ApiError extends Error {
 }
 
 /**
+ * 应用错误类（用于服务层）
+ */
+export class AppError extends Error {
+  constructor(
+    public message: string,
+    public code: string,
+    public cause?: unknown
+  ) {
+    super(message)
+    this.name = 'AppError'
+    Error.captureStackTrace(this, this.constructor)
+  }
+}
+
+/**
  * 验证错误（400 Bad Request）
  */
 export class ValidationError extends ApiError {

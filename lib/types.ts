@@ -33,7 +33,7 @@ export interface PaginationParams {
 /**
  * 社交平台类型
  */
-export type SocialPlatform = 'twitter' | 'github' | 'linkedin' | 'instagram' | 'youtube' | 'tiktok' | 'website' | 'email'
+export type SocialPlatform = 'twitter' | 'github' | 'linkedin' | 'instagram' | 'youtube' | 'facebook' | 'telegram' | 'whatsapp' | 'tiktok' | 'website' | 'email'
 
 /**
  * 创建社交链接输入
