@@ -12,6 +12,7 @@ import {
   Link as LinkIcon,
 } from 'lucide-react'
 import type { SocialLink, ExtraLink } from '@prisma/client'
+import { getBackgroundFillStyle, isDarkBackground } from '@/lib/utils/background'
 
 /**
  * 公开链接页面属性
@@ -116,11 +117,26 @@ export function PublicLinkPage({
   const goldenRatio = 1.618
   const baseSpacing = 12 // 基础间距
   const linkSpacing = Math.round(baseSpacing * goldenRatio) // 约 19px，取整为 20px
+  const darkBackground = isDarkBackground(backgroundColor)
+  const fillStyle = getBackgroundFillStyle(backgroundColor)
+  const profileTitleClass = darkBackground ? 'text-white' : 'text-gray-900'
+  const profileBioClass = darkBackground ? 'text-gray-100' : 'text-gray-700'
+  const cardClass = darkBackground
+    ? 'border-white/20 bg-white/10 text-white hover:bg-white/15'
+    : 'border-gray-200 bg-white text-gray-900 hover:bg-gray-50'
+  const cardSubTextClass = darkBackground ? 'text-gray-200' : 'text-gray-500'
+  const emptyStateClass = darkBackground
+    ? 'border-white/30 bg-white/10 text-gray-100'
+    : 'border-gray-300 bg-white/50 text-gray-500'
+  const avatarFallbackClass = darkBackground
+    ? 'bg-gradient-to-br from-gray-700 to-gray-800 ring-white/20'
+    : 'bg-gradient-to-br from-gray-200 to-gray-300 ring-white/50'
+  const avatarFallbackTextClass = darkBackground ? 'text-gray-100' : 'text-gray-500'
 
   return (
     <main
       className="min-h-screen flex items-center justify-center p-4"
-      style={{ backgroundColor }}
+      style={fillStyle}
     >
       <div className="w-full max-w-md">
         {/* 个人信息区域 */}
@@ -134,21 +150,21 @@ export function PublicLinkPage({
               className="mb-4 h-24 w-24 rounded-full object-cover shadow-lg ring-4 ring-white/50"
             />
           ) : (
-            <div className="mb-4 flex h-24 w-24 items-center justify-center rounded-full bg-gradient-to-br from-gray-200 to-gray-300 shadow-lg ring-4 ring-white/50">
-              <span className="text-3xl font-bold text-gray-500">
+            <div className={`mb-4 flex h-24 w-24 items-center justify-center rounded-full shadow-lg ring-4 ${avatarFallbackClass}`}>
+              <span className={`text-3xl font-bold ${avatarFallbackTextClass}`}>
                 {(displayName || username || 'U')[0].toUpperCase()}
               </span>
             </div>
           )}
 
           {/* 用户名/显示名称 */}
-          <h1 className="mb-2 text-center text-2xl font-bold text-gray-900">
+          <h1 className={`mb-2 text-center text-2xl font-bold ${profileTitleClass}`}>
             {displayName || username}
           </h1>
 
           {/* 简介 */}
           {bio && (
-            <p className="text-center text-sm text-gray-700 leading-relaxed max-w-[280px]">
+            <p className={`max-w-[280px] text-center text-sm leading-relaxed ${profileBioClass}`}>
               {bio}
             </p>
           )}
@@ -167,7 +183,7 @@ export function PublicLinkPage({
                 href={link.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-3 rounded-lg border border-gray-200 bg-white px-4 py-3 text-center text-sm font-medium text-gray-900 shadow-sm transition-all hover:bg-gray-50 hover:shadow-md"
+                className={`flex items-center gap-3 rounded-lg border px-4 py-3 text-center text-sm font-medium shadow-sm transition-all hover:shadow-md ${cardClass}`}
                 style={{ marginBottom: `${linkSpacing}px` }}
               >
                 <Icon className="h-5 w-5 flex-shrink-0" />
@@ -183,19 +199,19 @@ export function PublicLinkPage({
               href={link.url}
               target="_blank"
               rel="noopener noreferrer"
-              className="block rounded-lg border border-gray-200 bg-white px-4 py-3 text-center text-sm font-medium text-gray-900 shadow-sm transition-all hover:bg-gray-50 hover:shadow-md"
+              className={`block rounded-lg border px-4 py-3 text-center text-sm font-medium shadow-sm transition-all hover:shadow-md ${cardClass}`}
               style={{ marginBottom: `${linkSpacing}px` }}
             >
               {link.title}
               {link.description && (
-                <p className="mt-1 text-xs text-gray-500">{link.description}</p>
+                <p className={`mt-1 text-xs ${cardSubTextClass}`}>{link.description}</p>
               )}
             </a>
           ))}
 
           {/* 空状态提示 */}
           {socialLinks.length === 0 && extraLinks.length === 0 && (
-            <div className="rounded-lg border-2 border-dashed border-gray-300 bg-white/50 px-6 py-8 text-center text-sm text-gray-500">
+            <div className={`rounded-lg border-2 border-dashed px-6 py-8 text-center text-sm ${emptyStateClass}`}>
               暂无链接
             </div>
           )}

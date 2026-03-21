@@ -19,6 +19,7 @@ import {
 } from 'lucide-react'
 import { SocialLink } from '../link/social-links-form'
 import { ExtraLink } from '../link/extra-links-form'
+import { getBackgroundFillStyle, isDarkBackground } from '@/lib/utils/background'
 
 /**
  * 手机预览组件属性
@@ -75,29 +76,6 @@ const SOCIAL_ICONS: Record<string, React.ComponentType<{ className?: string }>> 
   tiktok: LinkIcon,
 }
 
-function isDarkColor(hexColor: string): boolean {
-  const hex = hexColor.replace('#', '')
-  const normalizedHex =
-    hex.length === 3
-      ? hex
-          .split('')
-          .map((char) => char + char)
-          .join('')
-      : hex
-
-  if (!/^[0-9a-fA-F]{6}$/.test(normalizedHex)) {
-    return false
-  }
-
-  const r = Number.parseInt(normalizedHex.slice(0, 2), 16)
-  const g = Number.parseInt(normalizedHex.slice(2, 4), 16)
-  const b = Number.parseInt(normalizedHex.slice(4, 6), 16)
-
-  // Perceived luminance in sRGB.
-  const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255
-  return luminance < 0.55
-}
-
 /**
  * 获取社交平台图标
  */
@@ -147,7 +125,11 @@ export function PhonePreview({
   const baseSpacing = 12 // 基础间距
   const linkSpacing = Math.round(baseSpacing * goldenRatio) // 约 19px，取整为 20px
   const darkBackground = useMemo(
-    () => isDarkColor(backgroundValue),
+    () => isDarkBackground(backgroundValue),
+    [backgroundValue]
+  )
+  const backgroundFillStyle = useMemo(
+    () => getBackgroundFillStyle(backgroundValue),
     [backgroundValue]
   )
 
@@ -255,9 +237,11 @@ export function PhonePreview({
             <div
               className="h-[600px] overflow-y-auto px-4 pb-8"
               style={{
-                backgroundColor: backgroundValue,
+                ...backgroundFillStyle,
                 scrollbarWidth: 'thin',
-                scrollbarColor: 'rgba(0, 0, 0, 0.2) transparent',
+                scrollbarColor: darkBackground
+                  ? 'rgba(255, 255, 255, 0.28) transparent'
+                  : 'rgba(0, 0, 0, 0.2) transparent',
               }}
             >
               {/* 个人信息区域 */}

@@ -2,6 +2,11 @@
 
 import { Check } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import {
+  getBackgroundFillStyle,
+  getBackgroundPatternLabel,
+  isDarkBackground,
+} from '@/lib/utils/background'
 
 /**
  * 背景颜色选项
@@ -43,11 +48,17 @@ export function BackgroundSelector({ value, onChange }: BackgroundSelectorProps)
               "relative h-20 rounded-lg border-2 transition-colors hover:border-ring/70",
               value === bg.value ? "border-primary" : "border-border"
             )}
-            style={{
-              backgroundColor: bg.value,
-            }}
+            style={getBackgroundFillStyle(bg.value)}
             title={bg.name}
           >
+            <span className={cn(
+              'absolute bottom-1.5 left-1.5 rounded px-1.5 py-0.5 text-[10px] font-medium',
+              isDarkBackground(bg.value)
+                ? 'bg-black/35 text-white'
+                : 'bg-white/70 text-gray-900'
+            )}>
+              {bg.name} · {getBackgroundPatternLabel(bg.value)}
+            </span>
             {value === bg.value && (
               <Check className="absolute left-1/2 top-1/2 h-5 w-5 -translate-x-1/2 -translate-y-1/2 text-white drop-shadow-md" />
             )}
