@@ -21,22 +21,22 @@ export default async function DashboardPage() {
   const linkData = await getOrCreateUserLink()
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background text-foreground">
       {/* Header */}
-      <header className="border-b border-gray-200 bg-white">
+      <header className="border-b border-border bg-card">
         <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
+              <h1 className="text-2xl font-bold text-foreground">Dashboard</h1>
             </div>
             <div className="flex items-center gap-4">
               {session.user.name && (
-                <span className="text-sm text-gray-600">{session.user.name}</span>
+                <span className="text-sm text-muted-foreground">{session.user.name}</span>
               )}
               <form action="/api/auth/signout" method="POST">
                 <button
                   type="submit"
-                  className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
+                  className="rounded-lg border border-border px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-muted"
                 >
                   登出
                 </button>
@@ -48,7 +48,7 @@ export default async function DashboardPage() {
 
       {/* Main Content */}
       <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-        <DashboardClient initialData={linkData} userName={session.user.name ?? ''} />
+        <DashboardClient initialData={linkData} />
       </main>
     </div>
   )

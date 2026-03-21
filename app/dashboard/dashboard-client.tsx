@@ -1,7 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
+import { useState, useEffect, useCallback, useMemo } from 'react'
 import { LinkForm, type LinkFormData } from '@/components/link'
 import { PhonePreview } from '@/components/preview'
 import { saveLink } from './actions'
@@ -25,10 +24,6 @@ interface DashboardClientProps {
    * 初始链接数据
    */
   initialData: LinkWithRelations
-  /**
-   * 用户名称
-   */
-  userName: string
 }
 
 /**
@@ -40,10 +35,10 @@ function linkToFormData(link: LinkWithRelations): LinkFormData {
     displayName: link.displayName || link.user.name || undefined,
     bio: link.bio || undefined,
     avatar: link.avatar || link.user.image || undefined,
-    backgroundType: (link.backgroundType as any) || 'solid',
+    backgroundType: 'solid',
     backgroundValue: link.backgroundValue,
     socialLinks: link.socialLinks.map((sl) => ({
-      platform: sl.platform as any,
+      platform: sl.platform as LinkFormData['socialLinks'][number]['platform'],
       url: sl.url,
       isVisible: sl.isVisible,
     })),
@@ -62,11 +57,11 @@ function linkToFormData(link: LinkWithRelations): LinkFormData {
  *
  * 处理表单提交、状态管理和预览更新
  */
-export function DashboardClient({ initialData, userName }: DashboardClientProps) {
-  const router = useRouter()
+export function DashboardClient({ initialData }: DashboardClientProps) {
+  const initialFormData = useMemo(() => linkToFormData(initialData), [initialData])
 
   // 表单数据状态
-  const [formData, setFormData] = useState<LinkFormData>(linkToFormData(initialData))
+  const [formData, setFormData] = useState<LinkFormData>(initialFormData)
 
   // 提交状态
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -90,7 +85,7 @@ export function DashboardClient({ initialData, userName }: DashboardClientProps)
   /**
    * 处理表单提交
    */
-  async function handleSubmit(data: LinkFormData) {
+  const handleSubmit = useCallback(async (data: LinkFormData) => {
     setIsSubmitting(true)
     setSubmitStatus({ type: null, message: '' })
 
@@ -125,16 +120,19 @@ export function DashboardClient({ initialData, userName }: DashboardClientProps)
     } finally {
       setIsSubmitting(false)
     }
-  }
+  }, [])
 
   /**
    * 处理表单数据变化（用于实时预览）
    */
-  function handleFormChange(data: LinkFormData) {
+  const handleFormChange = useCallback((data: LinkFormData) => {
     setFormData(data)
-    // 清除之前的成功/错误消息
-    setSubmitStatus({ type: null, message: '' })
-  }
+    setSubmitStatus((current) =>
+      current.type === null && current.message === ''
+        ? current
+        : { type: null, message: '' }
+    )
+  }, [])
 
   /**
    * 获取公开页面 URL（使用相对路径避免 hydration 不匹配）
@@ -191,20 +189,21 @@ export function DashboardClient({ initialData, userName }: DashboardClientProps)
           <Card>
             <CardContent className="pt-6">
               <LinkForm
-                defaultValues={formData}
+                defaultValues={initialFormData}
                 onSubmit={handleSubmit}
                 isSubmitting={isSubmitting}
                 submitButtonText="保存更改"
+                onFormDataChange={handleFormChange}
               />
 
               {/* 公开页面链接 */}
-              <div className="mt-6 rounded-lg border border-gray-200 bg-gray-50 p-4">
-                <p className="text-sm font-medium text-gray-700 mb-2">您的公开页面</p>
+              <div className="mt-6 rounded-lg border border-border bg-muted/40 p-4">
+                <p className="text-sm font-medium text-foreground mb-2">您的公开页面</p>
                 <a
                   href={publicPageUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-2 text-sm text-blue-600 hover:text-blue-800"
+                  className="flex items-center gap-2 text-sm text-primary hover:opacity-80"
                 >
                   {fullPublicUrl || publicPageUrl}
                   <ExternalLink className="h-3 w-3" />

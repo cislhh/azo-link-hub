@@ -1,6 +1,7 @@
 'use client'
 
-import { useForm } from 'react-hook-form'
+import { useEffect } from 'react'
+import { useForm, useWatch } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { Button } from '@/components/ui/button'
@@ -20,6 +21,19 @@ import {
   backgroundValueSchema,
   socialPlatformEnum,
 } from '@/lib/utils/validation'
+
+function toPreviewData(value: Partial<LinkFormData> | undefined): LinkFormData {
+  return {
+    username: value?.username ?? '',
+    displayName: value?.displayName ?? '',
+    bio: value?.bio ?? '',
+    avatar: value?.avatar ?? '',
+    backgroundType: 'solid',
+    backgroundValue: value?.backgroundValue ?? '#ffffff',
+    socialLinks: value?.socialLinks ?? [],
+    extraLinks: value?.extraLinks ?? [],
+  }
+}
 
 /**
  * 链接表单数据类型（明确定义）
@@ -87,6 +101,10 @@ interface LinkFormProps {
    * 提交按钮文本
    */
   submitButtonText?: string
+  /**
+   * 表单数据变化回调（用于实时预览）
+   */
+  onFormDataChange?: (data: LinkFormData) => void
 }
 
 /**
@@ -99,11 +117,12 @@ export function LinkForm({
   onSubmit,
   isSubmitting = false,
   submitButtonText = '保存',
+  onFormDataChange,
 }: LinkFormProps) {
   const {
+    control,
     register,
     handleSubmit,
-    watch,
     setValue,
     formState: { errors },
   } = useForm<LinkFormData>({
@@ -121,7 +140,27 @@ export function LinkForm({
     },
   })
 
-  const watchedValues = watch()
+  const backgroundValue = useWatch({
+    control,
+    name: 'backgroundValue',
+  })
+  const watchedFormData = useWatch({ control })
+  const socialLinks = useWatch({
+    control,
+    name: 'socialLinks',
+  })
+  const extraLinks = useWatch({
+    control,
+    name: 'extraLinks',
+  })
+
+  useEffect(() => {
+    if (!onFormDataChange) {
+      return
+    }
+
+    onFormDataChange(toPreviewData(watchedFormData))
+  }, [watchedFormData, onFormDataChange])
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
@@ -208,7 +247,7 @@ export function LinkForm({
         </CardHeader>
         <CardContent>
           <BackgroundSelector
-            value={watchedValues.backgroundValue}
+            value={backgroundValue ?? '#ffffff'}
             onChange={(value) => setValue('backgroundValue', value)}
           />
         </CardContent>
@@ -222,7 +261,7 @@ export function LinkForm({
         </CardHeader>
         <CardContent>
           <SocialLinksForm
-            value={watchedValues.socialLinks}
+            value={socialLinks ?? []}
             onChange={(value) => setValue('socialLinks', value)}
           />
         </CardContent>
@@ -236,7 +275,7 @@ export function LinkForm({
         </CardHeader>
         <CardContent>
           <ExtraLinksForm
-            value={watchedValues.extraLinks}
+            value={extraLinks ?? []}
             onChange={(value) => setValue('extraLinks', value)}
           />
         </CardContent>

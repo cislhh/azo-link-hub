@@ -1,6 +1,6 @@
 'use client'
 
-import { Plus, Trash2, GripVertical, Eye, EyeOff } from 'lucide-react'
+import { Plus, Trash2, GripVertical } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -81,28 +81,28 @@ export function ExtraLinksForm({ value, onChange }: ExtraLinksFormProps) {
 
       <div className="space-y-3">
         {value.length === 0 ? (
-          <div className="rounded-lg border border-dashed border-gray-300 p-8 text-center text-sm text-gray-500">
-            暂无额外链接，点击上方"添加"按钮添加
+          <div className="rounded-lg border border-dashed border-border p-8 text-center text-sm text-muted-foreground">
+            暂无额外链接，点击上方“添加”按钮添加
           </div>
         ) : (
           value.map((link, index) => (
             <div
               key={index}
               className={cn(
-                "space-y-3 rounded-lg border border-gray-200 p-4 transition-colors",
+                "space-y-3 rounded-lg border border-border bg-card p-4 transition-colors",
                 !link.isVisible && "opacity-50"
               )}
             >
               <div className="flex items-start justify-between gap-2">
                 <div className="flex items-center gap-2">
-                  <GripVertical className="h-5 w-5 text-gray-400" />
-                  <span className="text-sm font-medium text-gray-900">
+                  <GripVertical className="h-5 w-5 text-muted-foreground" />
+                  <span className="text-sm font-medium text-foreground">
                     链接 #{index + 1}
                   </span>
                 </div>
                 <div className="flex items-center gap-2">
                   <div className="flex items-center gap-2">
-                    <span className="text-xs text-gray-500">可见</span>
+                    <span className="text-xs text-muted-foreground">可见</span>
                     <Switch
                       checked={link.isVisible}
                       onCheckedChange={() => toggleVisibility(index)}
@@ -120,31 +120,47 @@ export function ExtraLinksForm({ value, onChange }: ExtraLinksFormProps) {
                 </div>
               </div>
 
-              <div className="space-y-2">
-                <Input
-                  type="text"
-                  value={link.title}
-                  onChange={(e) => updateLink(index, { title: e.target.value })}
-                  placeholder="链接标题 *"
-                />
-                <Input
-                  type="url"
-                  value={link.url}
-                  onChange={(e) => updateLink(index, { url: e.target.value })}
-                  placeholder="链接地址 (https://...) *"
-                />
-                <Textarea
-                  value={link.description || ''}
-                  onChange={(e) => updateLink(index, { description: e.target.value })}
-                  placeholder="链接描述（可选）"
-                  rows={2}
-                />
-                <Input
-                  type="text"
-                  value={link.icon || ''}
-                  onChange={(e) => updateLink(index, { icon: e.target.value })}
-                  placeholder="图标名称（可选，例如: link, calendar, etc.）"
-                />
+              <div className="space-y-3">
+                <div className="space-y-2">
+                  <Label htmlFor={`extra-title-${index}`}>链接标题</Label>
+                  <Input
+                    id={`extra-title-${index}`}
+                    type="text"
+                    value={link.title}
+                    onChange={(e) => updateLink(index, { title: e.target.value })}
+                    placeholder="例如: 我的博客"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor={`extra-url-${index}`}>链接地址</Label>
+                  <Input
+                    id={`extra-url-${index}`}
+                    type="url"
+                    value={link.url}
+                    onChange={(e) => updateLink(index, { url: e.target.value })}
+                    placeholder="https://example.com"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor={`extra-desc-${index}`}>链接描述</Label>
+                  <Textarea
+                    id={`extra-desc-${index}`}
+                    value={link.description || ''}
+                    onChange={(e) => updateLink(index, { description: e.target.value })}
+                    placeholder="简短描述这个链接（可选）"
+                    rows={2}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor={`extra-icon-${index}`}>图标名称</Label>
+                  <Input
+                    id={`extra-icon-${index}`}
+                    type="text"
+                    value={link.icon || ''}
+                    onChange={(e) => updateLink(index, { icon: e.target.value })}
+                    placeholder="例如: link, calendar, star（可选）"
+                  />
+                </div>
               </div>
             </div>
           ))

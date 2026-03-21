@@ -12,7 +12,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { Switch } from '@/components/ui/switch'
 import { cn } from '@/lib/utils'
 import { SocialPlatform } from '@/lib/utils/validation'
 
@@ -132,8 +131,8 @@ export function SocialLinksForm({ value, onChange }: SocialLinksFormProps) {
 
       <div className="space-y-3">
         {value.length === 0 ? (
-          <div className="rounded-lg border border-dashed border-gray-300 p-8 text-center text-sm text-gray-500">
-            暂无社交链接，点击上方"添加"按钮添加
+          <div className="rounded-lg border border-dashed border-border p-8 text-center text-sm text-muted-foreground">
+            暂无社交链接，点击上方“添加”按钮添加
           </div>
         ) : (
           value.map((link, index) => {
@@ -142,12 +141,12 @@ export function SocialLinksForm({ value, onChange }: SocialLinksFormProps) {
               <div
                 key={index}
                 className={cn(
-                  "rounded-lg border border-gray-200 p-4 transition-colors",
+                  "rounded-lg border border-border bg-card p-4 transition-colors",
                   !link.isVisible && "opacity-50"
                 )}
               >
                 <div className="mb-3 flex items-center justify-between">
-                  <span className="text-sm font-medium text-gray-900">
+                  <span className="text-sm font-medium text-foreground">
                     {platform?.label || link.platform}
                   </span>
                   <div className="flex items-center gap-2">
@@ -175,12 +174,16 @@ export function SocialLinksForm({ value, onChange }: SocialLinksFormProps) {
                     </Button>
                   </div>
                 </div>
-                <Input
-                  type="url"
-                  value={link.url}
-                  onChange={(e) => updateLink(index, { url: e.target.value })}
-                  placeholder={`${platform?.label || link.platform} URL`}
-                />
+                <div className="space-y-2">
+                  <Label htmlFor={`social-url-${index}`}>链接地址</Label>
+                  <Input
+                    id={`social-url-${index}`}
+                    type="url"
+                    value={link.url}
+                    onChange={(e) => updateLink(index, { url: e.target.value })}
+                    placeholder={`${platform?.label || link.platform} URL`}
+                  />
+                </div>
               </div>
             )
           })

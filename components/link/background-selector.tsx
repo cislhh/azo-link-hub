@@ -30,7 +30,7 @@ interface BackgroundSelectorProps {
 export function BackgroundSelector({ value, onChange }: BackgroundSelectorProps) {
   return (
     <div className="space-y-4">
-      <label className="block text-sm font-medium text-gray-900">
+      <label className="block text-sm font-medium text-foreground">
         背景颜色
       </label>
       <div className="grid grid-cols-4 gap-3">
@@ -40,8 +40,8 @@ export function BackgroundSelector({ value, onChange }: BackgroundSelectorProps)
             type="button"
             onClick={() => onChange(bg.value)}
             className={cn(
-              "relative h-20 rounded-lg border-2 transition-colors hover:border-gray-400",
-              value === bg.value ? "border-indigo-500" : "border-gray-200"
+              "relative h-20 rounded-lg border-2 transition-colors hover:border-ring/70",
+              value === bg.value ? "border-primary" : "border-border"
             )}
             style={{
               backgroundColor: bg.value,
