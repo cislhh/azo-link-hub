@@ -31,9 +31,10 @@ export function LogoutButton() {
         const databases = await indexedDB.databases()
         await Promise.all(
           databases.map((db) => {
-            if (db.name) {
+            const dbName = db.name
+            if (dbName) {
               return new Promise<void>((resolve, reject) => {
-                const request = indexedDB.deleteDatabase(db.name)
+                const request = indexedDB.deleteDatabase(dbName)
                 request.onsuccess = () => resolve()
                 request.onerror = () => reject(request.error)
               })

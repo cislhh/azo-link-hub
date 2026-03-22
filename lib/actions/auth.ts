@@ -37,9 +37,6 @@ export async function logoutAction() {
     ) {
       try {
         cookieStore.delete(name)
-        // 同时尝试清除不同路径的 cookie
-        cookieStore.delete(name, { path: '/' })
-        cookieStore.delete(name, { path: '/api' })
       } catch (error) {
         // 忽略删除失败的 cookie
         console.debug(`Failed to delete cookie ${name}:`, error)

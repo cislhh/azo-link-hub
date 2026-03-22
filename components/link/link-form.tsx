@@ -24,7 +24,7 @@ import {
   extraLinkSchema,
 } from '@/lib/utils/validation'
 
-function toPreviewData(value: Partial<LinkFormSchemaInput> | undefined): LinkFormData {
+function toPreviewData(value: unknown): LinkFormData {
   // 使用 linkFormSchema 来转换和验证数据
   const result = linkFormSchema.safeParse(value || {})
 
@@ -33,13 +33,14 @@ function toPreviewData(value: Partial<LinkFormSchemaInput> | undefined): LinkFor
   }
 
   // 如果验证失败，返回默认值
+  const partialValue = value as Partial<LinkFormSchemaInput> | undefined
   return {
-    username: value?.username ?? '',
-    displayName: value?.displayName ?? '',
-    bio: value?.bio ?? '',
-    avatar: value?.avatar ?? '',
+    username: partialValue?.username ?? '',
+    displayName: partialValue?.displayName ?? '',
+    bio: partialValue?.bio ?? '',
+    avatar: partialValue?.avatar ?? '',
     backgroundType: 'solid',
-    backgroundValue: value?.backgroundValue ?? '#ffffff',
+    backgroundValue: partialValue?.backgroundValue ?? '#ffffff',
     socialLinks: [],
     extraLinks: [],
   }
