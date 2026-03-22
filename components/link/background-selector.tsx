@@ -45,7 +45,7 @@ export function BackgroundSelector({ value, onChange }: BackgroundSelectorProps)
             type="button"
             onClick={() => onChange(bg.value)}
             className={cn(
-              "relative h-20 rounded-lg border-2 transition-colors hover:border-ring/70",
+              "relative h-20 rounded-lg border-2 transition-colors hover:border-ring/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 focus-visible:ring-offset-2 focus-visible:ring-offset-white",
               value === bg.value ? "border-primary" : "border-border"
             )}
             style={getBackgroundFillStyle(bg.value)}

@@ -135,10 +135,10 @@ export function ExtraLinksForm({ value, onChange }: ExtraLinksFormProps) {
                   <Label htmlFor={`extra-url-${index}`}>链接地址</Label>
                   <Input
                     id={`extra-url-${index}`}
-                    type="url"
+                    type="text"
                     value={link.url}
                     onChange={(e) => updateLink(index, { url: e.target.value })}
-                    placeholder="https://example.com"
+                    placeholder="example.com 或 https://example.com"
                   />
                 </div>
                 <div className="space-y-2">

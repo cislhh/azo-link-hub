@@ -16,9 +16,9 @@ import { cn } from '@/lib/utils'
 import { SocialPlatform } from '@/lib/utils/validation'
 
 /**
- * 支持的社交平台
+ * 国际社交平台
  */
-const PLATFORMS = [
+const INTERNATIONAL_PLATFORMS = [
   { value: 'github', label: 'GitHub', icon: 'GitHub' },
   { value: 'linkedin', label: 'LinkedIn', icon: 'LinkedIn' },
   { value: 'twitter', label: 'Twitter (X)', icon: 'Twitter' },
@@ -31,6 +31,25 @@ const PLATFORMS = [
   { value: 'tiktok', label: 'TikTok', icon: 'TikTok' },
   { value: 'website', label: 'Website', icon: 'Globe' },
 ] as const
+
+/**
+ * 国内社交平台
+ */
+const DOMESTIC_PLATFORMS = [
+  { value: 'wechat', label: '微信', icon: 'MessageCircle' },
+  { value: 'weibo', label: '微博', icon: 'Globe' },
+  { value: 'qq', label: 'QQ', icon: 'MessageCircle' },
+  { value: 'douyin', label: '抖音', icon: 'Video' },
+  { value: 'xiaohongshu', label: '小红书', icon: 'BookOpen' },
+  { value: 'zhihu', label: '知乎', icon: 'HelpCircle' },
+  { value: 'bilibili', label: 'B站', icon: 'Video' },
+  { value: 'kuaishou', label: '快手', icon: 'Video' },
+] as const
+
+/**
+ * 所有平台合并
+ */
+const ALL_PLATFORMS = [...INTERNATIONAL_PLATFORMS, ...DOMESTIC_PLATFORMS]
 
 /**
  * 社交链接数据类型
@@ -53,6 +72,7 @@ interface SocialLinksFormProps {
 
 export function SocialLinksForm({ value, onChange }: SocialLinksFormProps) {
   const [selectedPlatform, setSelectedPlatform] = useState<SocialPlatform>('github')
+  const [platformCategory, setPlatformCategory] = useState<'international' | 'domestic'>('international')
 
   /**
    * 添加新链接
@@ -91,6 +111,42 @@ export function SocialLinksForm({ value, onChange }: SocialLinksFormProps) {
     updateLink(index, { isVisible: !value[index].isVisible })
   }
 
+  /**
+   * 获取平台信息
+   */
+  const getPlatformInfo = (platformValue: string) => {
+    return ALL_PLATFORMS.find((p) => p.value === platformValue)
+  }
+
+  /**
+   * 获取当前分类的平台列表
+   */
+  const getCurrentPlatforms = () => {
+    return platformCategory === 'international' ? INTERNATIONAL_PLATFORMS : DOMESTIC_PLATFORMS
+  }
+
+  /**
+   * 处理平台选择
+   */
+  const handlePlatformSelect = (platformValue: string) => {
+    setSelectedPlatform(platformValue as SocialPlatform)
+  }
+
+  /**
+   * 切换分类时，自动选择该分类下的第一个可用平台
+   */
+  const handleCategoryChange = (category: 'international' | 'domestic') => {
+    setPlatformCategory(category)
+    const platforms = category === 'international' ? INTERNATIONAL_PLATFORMS : DOMESTIC_PLATFORMS
+    // 选择第一个未被添加的平台
+    const firstAvailable = platforms.find(p => !value.some(link => link.platform === p.value))
+    if (firstAvailable) {
+      setSelectedPlatform(firstAvailable.value as SocialPlatform)
+    } else {
+      setSelectedPlatform(platforms[0].value as SocialPlatform)
+    }
+  }
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
@@ -111,32 +167,79 @@ export function SocialLinksForm({ value, onChange }: SocialLinksFormProps) {
 
       <Select
         value={selectedPlatform}
-        onValueChange={(value) => setSelectedPlatform(value as SocialPlatform)}
+        onValueChange={handlePlatformSelect}
       >
         <SelectTrigger>
           <SelectValue placeholder="选择平台" />
         </SelectTrigger>
-        <SelectContent>
-          {PLATFORMS.map((platform) => (
-            <SelectItem
-              key={platform.value}
-              value={platform.value}
-              disabled={value.some((link) => link.platform === platform.value)}
+        <SelectContent className="p-0">
+          {/* 顶部分类切换 */}
+          <div className="relative flex items-center border-b border-border">
+            <button
+              type="button"
+              onClick={() => handleCategoryChange('international')}
+              className={cn(
+                "flex-1 px-3 py-2 text-sm font-medium transition-all",
+                platformCategory === 'international'
+                  ? "text-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+              )}
             >
-              {platform.label}
-            </SelectItem>
-          ))}
+              国际平台
+            </button>
+            <button
+              type="button"
+              onClick={() => handleCategoryChange('domestic')}
+              className={cn(
+                "flex-1 px-3 py-2 text-sm font-medium transition-all",
+                platformCategory === 'domestic'
+                  ? "text-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+              )}
+            >
+              国内平台
+            </button>
+            {/* Active指示线 */}
+            <div
+              className={cn(
+                "absolute bottom-0 h-0.5 w-1/2 bg-primary transition-all duration-200",
+                platformCategory === 'international' ? "left-0" : "left-1/2"
+              )}
+            />
+          </div>
+
+          {/* 平台列表，带内部滚动 */}
+          <div className="max-h-50 overflow-y-auto">
+            {getCurrentPlatforms().map((platform) => {
+              const isAdded = value.some((link) => link.platform === platform.value)
+              return (
+                <SelectItem
+                  key={platform.value}
+                  value={platform.value}
+                  disabled={isAdded}
+                  className="cursor-pointer"
+                >
+                  <div className="flex items-center justify-between gap-2">
+                    <span>{platform.label}</span>
+                    {isAdded && (
+                      <span className="text-xs text-muted-foreground">已添加</span>
+                    )}
+                  </div>
+                </SelectItem>
+              )
+            })}
+          </div>
         </SelectContent>
       </Select>
 
       <div className="space-y-3">
         {value.length === 0 ? (
           <div className="rounded-lg border border-dashed border-border p-8 text-center text-sm text-muted-foreground">
-            暂无社交链接，点击上方“添加”按钮添加
+            暂无社交链接，点击上方&ldquo;添加&rdquo;按钮添加
           </div>
         ) : (
           value.map((link, index) => {
-            const platform = PLATFORMS.find((p) => p.value === link.platform)
+            const platform = getPlatformInfo(link.platform)
             return (
               <div
                 key={index}
@@ -178,10 +281,14 @@ export function SocialLinksForm({ value, onChange }: SocialLinksFormProps) {
                   <Label htmlFor={`social-url-${index}`}>链接地址</Label>
                   <Input
                     id={`social-url-${index}`}
-                    type="url"
+                    type="text"
                     value={link.url}
                     onChange={(e) => updateLink(index, { url: e.target.value })}
-                    placeholder={`${platform?.label || link.platform} URL`}
+                    placeholder={
+                      link.platform === 'email' || link.platform === 'wechat' || link.platform === 'qq'
+                        ? 'example@email.com'
+                        : `${platform?.label || link.platform} URL`
+                    }
                   />
                 </div>
               </div>

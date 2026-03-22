@@ -20,9 +20,19 @@ import {
   backgroundTypeEnum,
   backgroundValueSchema,
   socialPlatformEnum,
+  socialLinkSchema,
+  extraLinkSchema,
 } from '@/lib/utils/validation'
 
-function toPreviewData(value: Partial<LinkFormData> | undefined): LinkFormData {
+function toPreviewData(value: Partial<LinkFormSchemaInput> | undefined): LinkFormData {
+  // 使用 linkFormSchema 来转换和验证数据
+  const result = linkFormSchema.safeParse(value || {})
+
+  if (result.success) {
+    return result.data
+  }
+
+  // 如果验证失败，返回默认值
   return {
     username: value?.username ?? '',
     displayName: value?.displayName ?? '',
@@ -30,24 +40,15 @@ function toPreviewData(value: Partial<LinkFormData> | undefined): LinkFormData {
     avatar: value?.avatar ?? '',
     backgroundType: 'solid',
     backgroundValue: value?.backgroundValue ?? '#ffffff',
-    socialLinks: value?.socialLinks ?? [],
-    extraLinks: value?.extraLinks ?? [],
+    socialLinks: [],
+    extraLinks: [],
   }
 }
 
 /**
- * 链接表单数据类型（明确定义）
+ * 链接表单数据类型（从 schema 推断）
  */
-export interface LinkFormData {
-  username: string
-  displayName?: string
-  bio?: string
-  avatar?: string
-  backgroundType: 'solid'
-  backgroundValue: string
-  socialLinks: SocialLink[]
-  extraLinks: ExtraLink[]
-}
+export type LinkFormData = LinkFormSchemaOutput
 
 /**
  * 链接表单验证 Schema
@@ -63,7 +64,29 @@ const linkFormSchema = z.object({
     .array(
       z.object({
         platform: socialPlatformEnum,
-        url: z.string().url('链接必须是有效的URL'),
+        url: z
+          .string()
+          .min(1, '链接地址不能为空')
+          .transform((val) => {
+            // 如果已经有协议，直接返回
+            if (val.match(/^https?:\/\//i) || val.match(/^mailto:/i)) {
+              return val
+            }
+            // email 平台使用 mailto: 协议
+            if (val.includes('@')) {
+              return `mailto:${val}`
+            }
+            // 其他情况添加 https://
+            return `https://${val}`
+          })
+          .refine((val) => {
+            try {
+              const url = new URL(val)
+              return ['http:', 'https:', 'mailto:'].includes(url.protocol)
+            } catch {
+              return false
+            }
+          }, '链接必须是有效的URL'),
         isVisible: z.boolean(),
       })
     )
@@ -72,7 +95,25 @@ const linkFormSchema = z.object({
     .array(
       z.object({
         title: z.string().min(1, '链接标题至少1个字符').max(50, '链接标题最多50个字符'),
-        url: z.string().url('链接必须是有效的URL'),
+        url: z
+          .string()
+          .min(1, '链接地址不能为空')
+          .transform((val) => {
+            // 如果已经有协议，直接返回
+            if (val.match(/^https?:\/\//i)) {
+              return val
+            }
+            // 添加 https://
+            return `https://${val}`
+          })
+          .refine((val) => {
+            try {
+              const url = new URL(val)
+              return url.protocol === 'http:' || url.protocol === 'https:'
+            } catch {
+              return false
+            }
+          }, '链接必须是有效的URL'),
         description: z.string().max(200, '链接描述最多200个字符').optional(),
         icon: z.string().max(50, '图标名称最多50个字符').optional(),
         isVisible: z.boolean(),
@@ -80,6 +121,12 @@ const linkFormSchema = z.object({
     )
     .min(0),
 })
+
+/**
+ * 从 linkFormSchema 推断的表单数据类型
+ */
+type LinkFormSchemaInput = z.input<typeof linkFormSchema>
+type LinkFormSchemaOutput = z.output<typeof linkFormSchema>
 
 /**
  * 链接表单组件属性
