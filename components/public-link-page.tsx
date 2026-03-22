@@ -1,18 +1,6 @@
-import {
-  Github,
-  Linkedin,
-  Twitter,
-  Instagram,
-  Youtube,
-  Facebook,
-  Send,
-  MessageCircle,
-  Mail,
-  Globe,
-  Link as LinkIcon,
-} from 'lucide-react'
 import type { SocialLink, ExtraLink } from '@prisma/client'
 import { getBackgroundFillStyle, isDarkBackground } from '@/lib/utils/background'
+import { getSocialIcon, getPlatformName } from '@/components/preview/social-utils'
 
 /**
  * 公开链接页面属性
@@ -50,50 +38,6 @@ export interface PublicLinkPageProps {
    * 额外链接列表
    */
   extraLinks: ExtraLink[]
-}
-
-/**
- * 社交平台图标映射
- */
-const SOCIAL_ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
-  github: Github,
-  linkedin: Linkedin,
-  twitter: Twitter,
-  instagram: Instagram,
-  youtube: Youtube,
-  facebook: Facebook,
-  telegram: Send,
-  whatsapp: MessageCircle,
-  email: Mail,
-  website: Globe,
-  tiktok: LinkIcon,
-}
-
-/**
- * 获取社交平台图标
- */
-function getSocialIcon(platform: string): React.ComponentType<{ className?: string }> {
-  return SOCIAL_ICONS[platform] || LinkIcon
-}
-
-/**
- * 获取社交平台显示名称
- */
-function getPlatformName(platform: string): string {
-  const names: Record<string, string> = {
-    github: 'GitHub',
-    linkedin: 'LinkedIn',
-    twitter: 'Twitter',
-    instagram: 'Instagram',
-    youtube: 'YouTube',
-    facebook: 'Facebook',
-    telegram: 'Telegram',
-    whatsapp: 'WhatsApp',
-    email: 'Email',
-    website: 'Website',
-    tiktok: 'TikTok',
-  }
-  return names[platform] || platform
 }
 
 /**
@@ -185,7 +129,11 @@ export function PublicLinkPage({
                 target="_blank"
                 rel="noopener noreferrer"
                 className={`flex items-center gap-3 rounded-lg border px-4 py-3 text-sm font-medium shadow-sm transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 active:translate-y-0 cursor-pointer ${cardClass}`}
-                style={{ marginBottom: `${linkSpacing}px` }}
+                style={{
+                  marginBottom: `${linkSpacing}px`,
+                  // 优化长列表渲染：content-visibility 允许浏览器跳过不可见内容的渲染
+                  contentVisibility: socialLinks.length > 10 ? 'auto' : 'visible'
+                }}
               >
                 <Icon className="h-5 w-5 flex-shrink-0" />
                 <span className="flex-1 text-left">{platformName}</span>
@@ -201,7 +149,11 @@ export function PublicLinkPage({
               target="_blank"
               rel="noopener noreferrer"
               className={`block rounded-lg border px-4 py-3 text-sm font-medium shadow-sm transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 active:translate-y-0 cursor-pointer ${cardClass}`}
-              style={{ marginBottom: `${linkSpacing}px` }}
+              style={{
+                marginBottom: `${linkSpacing}px`,
+                // 优化长列表渲染：content-visibility 允许浏览器跳过不可见内容的渲染
+                contentVisibility: extraLinks.length > 10 ? 'auto' : 'visible'
+              }}
             >
               {link.title}
               {link.description && (

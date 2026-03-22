@@ -14,6 +14,7 @@ import {
 } from '@/components/ui/select'
 import { cn } from '@/lib/utils'
 import { SocialPlatform } from '@/lib/utils/validation'
+import { PlatformCategorySwitch } from './platform-category-switch'
 
 /**
  * 国际社交平台
@@ -173,40 +174,11 @@ export function SocialLinksForm({ value, onChange }: SocialLinksFormProps) {
           <SelectValue placeholder="选择平台" />
         </SelectTrigger>
         <SelectContent className="p-0">
-          {/* 顶部分类切换 */}
-          <div className="relative flex items-center border-b border-border">
-            <button
-              type="button"
-              onClick={() => handleCategoryChange('international')}
-              className={cn(
-                "flex-1 px-3 py-2 text-sm font-medium transition-all",
-                platformCategory === 'international'
-                  ? "text-foreground shadow-sm"
-                  : "text-muted-foreground hover:text-foreground"
-              )}
-            >
-              国际平台
-            </button>
-            <button
-              type="button"
-              onClick={() => handleCategoryChange('domestic')}
-              className={cn(
-                "flex-1 px-3 py-2 text-sm font-medium transition-all",
-                platformCategory === 'domestic'
-                  ? "text-foreground shadow-sm"
-                  : "text-muted-foreground hover:text-foreground"
-              )}
-            >
-              国内平台
-            </button>
-            {/* Active指示线 */}
-            <div
-              className={cn(
-                "absolute bottom-0 h-0.5 w-1/2 bg-primary transition-all duration-200",
-                platformCategory === 'international' ? "left-0" : "left-1/2"
-              )}
-            />
-          </div>
+          {/* 顶部分类切换 - 使用提取的组件 */}
+          <PlatformCategorySwitch
+            activeCategory={platformCategory}
+            onCategoryChange={handleCategoryChange}
+          />
 
           {/* 平台列表，带内部滚动 */}
           <div className="max-h-50 overflow-y-auto">

@@ -1,25 +1,12 @@
 'use client'
 
-import { useState, useEffect, useMemo } from 'react'
-import {
-  Github,
-  Linkedin,
-  Twitter,
-  Instagram,
-  Youtube,
-  Facebook,
-  Send,
-  MessageCircle,
-  Mail,
-  Globe,
-  Link as LinkIcon,
-  Clock,
-  Wifi,
-  Battery,
-} from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { Clock, Wifi, Battery } from 'lucide-react'
 import { SocialLink } from '../link/social-links-form'
 import { ExtraLink } from '../link/extra-links-form'
 import { getBackgroundFillStyle, isDarkBackground } from '@/lib/utils/background'
+import { SocialLinkItem } from './social-link-item'
+import { ExtraLinkItem } from './extra-link-item'
 
 /**
  * 手机预览组件属性
@@ -60,30 +47,6 @@ export interface PhonePreviewProps {
 }
 
 /**
- * 社交平台图标映射
- */
-const SOCIAL_ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
-  github: Github,
-  linkedin: Linkedin,
-  twitter: Twitter,
-  instagram: Instagram,
-  youtube: Youtube,
-  facebook: Facebook,
-  telegram: Send,
-  whatsapp: MessageCircle,
-  email: Mail,
-  website: Globe,
-  tiktok: LinkIcon,
-}
-
-/**
- * 获取社交平台图标
- */
-function getSocialIcon(platform: string): React.ComponentType<{ className?: string }> {
-  return SOCIAL_ICONS[platform] || LinkIcon
-}
-
-/**
  * 手机预览组件
  *
  * 实时展示用户链接页面的最终效果，使用 iPhone 风格的外框设计
@@ -99,6 +62,9 @@ export function PhonePreview({
 }: PhonePreviewProps) {
   /**
    * 当前时间（仅客户端渲染）
+   *
+   * 注意：这个 useEffect 是必要的，因为它模拟了手机状态栏的时间显示
+   * 定时器每60秒更新一次，并在组件卸载时正确清理
    */
   const [currentTime, setCurrentTime] = useState('')
 
@@ -124,14 +90,10 @@ export function PhonePreview({
   const goldenRatio = 1.618
   const baseSpacing = 12 // 基础间距
   const linkSpacing = Math.round(baseSpacing * goldenRatio) // 约 19px，取整为 20px
-  const darkBackground = useMemo(
-    () => isDarkBackground(backgroundValue),
-    [backgroundValue]
-  )
-  const backgroundFillStyle = useMemo(
-    () => getBackgroundFillStyle(backgroundValue),
-    [backgroundValue]
-  )
+
+  // 简单计算不需要 useMemo（根据 Vercel React Best Practices）
+  const darkBackground = isDarkBackground(backgroundValue)
+  const backgroundFillStyle = getBackgroundFillStyle(backgroundValue)
 
   const profileTitleClass = darkBackground ? 'text-white' : 'text-gray-900'
   const profileBioClass = darkBackground ? 'text-gray-100' : 'text-gray-700'
@@ -146,66 +108,6 @@ export function PhonePreview({
     ? 'bg-gradient-to-br from-gray-700 to-gray-800 ring-white/20'
     : 'bg-gradient-to-br from-gray-200 to-gray-300 ring-white/50'
   const avatarFallbackTextClass = darkBackground ? 'text-gray-100' : 'text-gray-500'
-
-  /**
-   * 渲染社交链接项
-   */
-  const renderSocialLink = (link: SocialLink, index: number) => {
-    if (!link.isVisible) return null
-
-    const Icon = getSocialIcon(link.platform)
-    const platformName =
-      {
-        github: 'GitHub',
-        linkedin: 'LinkedIn',
-        twitter: 'Twitter',
-        instagram: 'Instagram',
-        youtube: 'YouTube',
-        facebook: 'Facebook',
-        telegram: 'Telegram',
-        whatsapp: 'WhatsApp',
-        email: 'Email',
-        website: 'Website',
-        tiktok: 'TikTok',
-      }[link.platform] || link.platform
-
-    return (
-      <a
-        key={`social-${index}`}
-        href={link.url}
-        target="_blank"
-        rel="noopener noreferrer"
-        className={`flex items-center gap-3 rounded-lg border px-4 py-3 text-center text-sm font-medium shadow-sm transition-all hover:shadow-md ${cardClass}`}
-        style={{ marginBottom: `${linkSpacing}px` }}
-      >
-        <Icon className="h-5 w-5 flex-shrink-0" />
-        <span className="flex-1 text-left">{platformName}</span>
-      </a>
-    )
-  }
-
-  /**
-   * 渲染额外链接项
-   */
-  const renderExtraLink = (link: ExtraLink, index: number) => {
-    if (!link.isVisible) return null
-
-    return (
-      <a
-        key={`extra-${index}`}
-        href={link.url}
-        target="_blank"
-        rel="noopener noreferrer"
-        className={`block rounded-lg border px-4 py-3 text-center text-sm font-medium shadow-sm transition-all hover:shadow-md ${cardClass}`}
-        style={{ marginBottom: `${linkSpacing}px` }}
-      >
-        {link.title}
-        {link.description && (
-          <p className={`mt-1 text-xs ${cardSubTextClass}`}>{link.description}</p>
-        )}
-      </a>
-    )
-  }
 
   return (
     <div className="flex flex-col items-center">
@@ -280,12 +182,31 @@ export function PhonePreview({
                 {/* 社交链接 */}
                 {socialLinks
                   .filter((link) => link.isVisible && link.url)
-                  .map((link, index) => renderSocialLink(link, index))}
+                  .map((link, index) => (
+                    <SocialLinkItem
+                      key={`social-${index}`}
+                      link={link}
+                      index={index}
+                      linkSpacing={linkSpacing}
+                      cardClass={cardClass}
+                      totalLinks={socialLinks.length + extraLinks.length}
+                    />
+                  ))}
 
                 {/* 额外链接 */}
                 {extraLinks
                   .filter((link) => link.isVisible && link.url)
-                  .map((link, index) => renderExtraLink(link, index))}
+                  .map((link, index) => (
+                    <ExtraLinkItem
+                      key={`extra-${index}`}
+                      link={link}
+                      index={index}
+                      linkSpacing={linkSpacing}
+                      cardClass={cardClass}
+                      cardSubTextClass={cardSubTextClass}
+                      totalLinks={socialLinks.length + extraLinks.length}
+                    />
+                  ))}
 
                 {/* 空状态提示 */}
                 {socialLinks.filter((l) => l.isVisible).length === 0 &&

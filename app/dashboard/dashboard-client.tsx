@@ -1,8 +1,8 @@
 'use client'
 
 import { useState, useEffect, useCallback, useMemo } from 'react'
-import { LinkForm, type LinkFormData } from '@/components/link'
-import { PhonePreview } from '@/components/preview'
+import { LinkForm, type LinkFormData } from '@/components/link/link-form'
+import { PhonePreview } from '@/components/preview/phone-preview'
 import { saveLink } from './actions'
 import type { LinkWithRelations } from '@/lib/services/link.service'
 import {

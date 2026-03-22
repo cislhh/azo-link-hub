@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { linkService } from '@/lib/services/link.service'
+import { getLinkByUsernameCached } from '@/lib/services/link.service'
 import { AppError } from '@/lib/errors'
 
 /**
@@ -28,7 +28,7 @@ export async function GET(
       )
     }
 
-    const link = await linkService.getLinkByUsername(username)
+    const link = await getLinkByUsernameCached(username)
 
     if (!link) {
       return NextResponse.json(

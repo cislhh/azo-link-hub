@@ -1,7 +1,12 @@
 'use server'
 
 import { auth } from '@/lib/auth'
-import { linkService, type LinkWithRelations } from '@/lib/services/link.service'
+import {
+  linkService,
+  getLinkByUserIdCached,
+  getLinkWithRelationsCached,
+  type LinkWithRelations,
+} from '@/lib/services/link.service'
 import { createLinkSchema, type CreateLinkInput } from '@/lib/utils/validation'
 import { AppError } from '@/lib/errors'
 import { revalidatePath } from 'next/cache'
@@ -21,14 +26,14 @@ export async function getUserLink(): Promise<LinkWithRelations | null> {
       throw new AppError('用户未登录', 'UNAUTHORIZED')
     }
 
-    const link = await linkService.getLinkByUserId(session.user.id)
+    const link = await getLinkByUserIdCached(session.user.id)
 
     if (!link) {
       return null
     }
 
-    // 获取包含关联数据的完整链接
-    return await linkService.getLinkWithRelations(link.id)
+    // 获取包含关联数据的完整链接（使用缓存版本）
+    return await getLinkWithRelationsCached(link.id)
   } catch (error) {
     if (error instanceof AppError) {
       throw error
@@ -52,7 +57,13 @@ export async function getOrCreateUserLink(): Promise<LinkWithRelations> {
       throw new AppError('用户未登录', 'UNAUTHORIZED')
     }
 
-    let link = await linkService.getLinkByUserId(session.user.id)
+    // 并行检查链接是否存在和获取用户信息（如果需要）
+    const [link] = await Promise.all([
+      getLinkByUserIdCached(session.user.id),
+      // 可以在此添加其他独立的查询
+    ])
+
+    let finalLink = link
 
     if (!link) {
       // 创建默认链接
@@ -61,7 +72,7 @@ export async function getOrCreateUserLink(): Promise<LinkWithRelations> {
         ? session.user.email.split('@')[0].replace(/[^a-zA-Z0-9_-]/g, '')
         : `user_${Date.now()}`
 
-      link = await linkService.createLink(session.user.id, {
+      finalLink = await linkService.createLink(session.user.id, {
         username: defaultUsername,
         backgroundValue: '#ffffff',
         bio: '',
@@ -70,8 +81,13 @@ export async function getOrCreateUserLink(): Promise<LinkWithRelations> {
       })
     }
 
-    // 获取包含关联数据的完整链接
-    const linkWithRelations = await linkService.getLinkWithRelations(link.id)
+    // finalLink 在这里保证非空（要么是原始 link，要么是新创建的）
+    if (!finalLink) {
+      throw new AppError('链接创建失败', 'CREATE_LINK_FAILED')
+    }
+
+    // 获取包含关联数据的完整链接（使用缓存版本）
+    const linkWithRelations = await getLinkWithRelationsCached(finalLink.id)
 
     if (!linkWithRelations) {
       throw new AppError('获取链接数据失败', 'GET_LINK_ERROR')
@@ -106,8 +122,8 @@ export async function saveLink(data: CreateLinkInput): Promise<LinkWithRelations
       throw new AppError('用户未登录', 'UNAUTHORIZED')
     }
 
-    // 检查用户是否已有链接
-    let existingLink = await linkService.getLinkByUserId(session.user.id)
+    // 检查用户是否已有链接（使用缓存版本）
+    let existingLink = await getLinkByUserIdCached(session.user.id)
 
     if (existingLink) {
       // 更新现有链接
@@ -127,8 +143,8 @@ export async function saveLink(data: CreateLinkInput): Promise<LinkWithRelations
       revalidatePath(`/${validatedData.username}`)
       revalidatePath('/dashboard')
 
-      // 获取更新后的完整数据
-      const updatedLink = await linkService.getLinkWithRelations(existingLink.id)
+      // 获取更新后的完整数据（使用缓存版本）
+      const updatedLink = await getLinkWithRelationsCached(existingLink.id)
 
       if (!updatedLink) {
         throw new AppError('获取更新后的链接失败', 'GET_UPDATED_LINK_ERROR')
@@ -153,8 +169,8 @@ export async function saveLink(data: CreateLinkInput): Promise<LinkWithRelations
       revalidatePath(`/${validatedData.username}`)
       revalidatePath('/dashboard')
 
-      // 获取新创建的完整数据
-      const linkWithRelations = await linkService.getLinkWithRelations(newLink.id)
+      // 获取新创建的完整数据（使用缓存版本）
+      const linkWithRelations = await getLinkWithRelationsCached(newLink.id)
 
       if (!linkWithRelations) {
         throw new AppError('获取新创建的链接失败', 'GET_NEW_LINK_ERROR')
@@ -186,7 +202,7 @@ export async function deleteUserLink(): Promise<boolean> {
       throw new AppError('用户未登录', 'UNAUTHORIZED')
     }
 
-    const link = await linkService.getLinkByUserId(session.user.id)
+    const link = await getLinkByUserIdCached(session.user.id)
 
     if (!link) {
       return false

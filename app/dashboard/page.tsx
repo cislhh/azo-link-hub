@@ -12,14 +12,16 @@ import { LogoutButton } from '@/components/logout-button'
  * - 右侧 35%：实时预览区域
  */
 export default async function DashboardPage() {
-  const session = await auth()
+  // 并行执行：避免等待 getOrCreateUserLink 完成才开始获取 session
+  // getOrCreateUserLink 内部会调用 auth()，但由于使用了 React.cache，第二次调用会立即返回
+  const [linkData, session] = await Promise.all([
+    getOrCreateUserLink(),
+    auth(),
+  ])
 
   if (!session?.user) {
     redirect('/login')
   }
-
-  // 获取或创建用户的链接数据
-  const linkData = await getOrCreateUserLink()
 
   return (
     <div className="min-h-screen bg-background text-foreground">

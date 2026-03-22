@@ -1,18 +1,19 @@
 import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
+import { cache } from 'react'
 import { linkService } from '@/lib/services/link.service'
 import { PublicLinkPage } from '@/components/public-link-page'
 
 /**
- * 根据 username 获取链接数据
+ * 根据 username 获取链接数据（使用 React.cache 去重）
  *
  * @param username - 用户名
  * @returns 包含关联数据的 Link 对象或 null
  */
-async function getUserLink(username: string) {
+const getUserLink = cache(async (username: string) => {
   const link = await linkService.getLinkByUsername(username)
   return link
-}
+})
 
 /**
  * 生成页面元数据（SEO）

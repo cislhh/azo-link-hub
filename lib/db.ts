@@ -47,6 +47,73 @@ if (process.env.NODE_ENV !== 'production') {
 const adapter = new PrismaPg(pool)
 
 /**
+ * 数据库初始化状态
+ */
+let isInitialized = false
+let initPromise: Promise<boolean> | null = null
+
+/**
+ * 初始化数据库连接
+ *
+ * 确保数据库连接只创建一次（遵循 advanced-init-once 最佳实践）
+ * 在首次使用时进行连接验证
+ *
+ * @returns Promise<boolean> 初始化是否成功
+ */
+export async function initializeDatabase(): Promise<boolean> {
+  // 如果已经初始化，直接返回
+  if (isInitialized) {
+    return true
+  }
+
+  // 如果正在初始化，等待初始化完成
+  if (initPromise) {
+    return initPromise
+  }
+
+  // 开始初始化
+  initPromise = (async () => {
+    try {
+      // 测试数据库连接
+      await prisma.$connect()
+
+      // 执行简单的测试查询
+      await prisma.$queryRaw`SELECT 1`
+
+      if (env.NODE_ENV === 'development') {
+        console.log('✅ Database connected successfully')
+      }
+
+      isInitialized = true
+      return true
+    } catch (error) {
+      console.error('❌ Database connection failed:', error)
+      throw new Error(`Database initialization failed: ${error}`)
+    } finally {
+      // 初始化完成后清除 Promise，允许重试
+      initPromise = null
+    }
+  })()
+
+  return initPromise
+}
+
+/**
+ * 检查数据库连接健康状态
+ *
+ * @returns Promise<boolean> 数据库是否健康
+ */
+export async function healthCheck(): Promise<boolean> {
+  try {
+    await prisma.$queryRaw`SELECT 1`
+    return true
+  } catch (error) {
+    console.error('Database health check failed:', error)
+    return false
+  }
+}
+
+/**
  * Prisma Client 实例
  *
  * 开发环境复用实例，避免热重载时创建多个连接
@@ -77,4 +144,5 @@ if (env.NODE_ENV !== 'production') {
 export async function disconnectPrisma() {
   await prisma.$disconnect()
   await pool.end()
+  isInitialized = false
 }

@@ -7,6 +7,7 @@
 
 import { prisma } from '@/lib/db'
 import { AppError } from '@/lib/errors'
+import { cache } from 'react'
 import type {
   Link,
   SocialLink,
@@ -468,3 +469,38 @@ export class LinkService {
 
 // 导出单例实例
 export const linkService = new LinkService()
+
+/**
+ * 使用 React.cache 缓存的服务方法
+ *
+ * 这些方法在同一请求中自动去重，避免重复的数据库查询
+ * 遵循 Vercel React Best Practices - server-cache-react 规则
+ */
+
+/**
+ * 获取链接（带缓存）
+ */
+export const getLinkByIdCached = cache(async (id: string) => {
+  return await linkService.getLinkById(id)
+})
+
+/**
+ * 获取链接及其关联数据（带缓存）
+ */
+export const getLinkWithRelationsCached = cache(async (id: string) => {
+  return await linkService.getLinkWithRelations(id)
+})
+
+/**
+ * 根据用户 ID 获取链接（带缓存）
+ */
+export const getLinkByUserIdCached = cache(async (userId: string) => {
+  return await linkService.getLinkByUserId(userId)
+})
+
+/**
+ * 根据 username 获取公开链接（带缓存）
+ */
+export const getLinkByUsernameCached = cache(async (username: string) => {
+  return await linkService.getLinkByUsername(username)
+})
