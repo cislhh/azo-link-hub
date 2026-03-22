@@ -10,7 +10,7 @@ const envSchema = z.object({
   NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
 
   // 数据库配置
-  DATABASE_URL: z.string().url('DATABASE_URL 必须是有效的 URL'),
+  DATABASE_URL: z.string().url(),
   DB_POOL_MAX: z
     .string()
     .default('10')
@@ -43,8 +43,15 @@ function validateEnv(): z.infer<typeof envSchema> {
   const result = envSchema.safeParse(process.env)
 
   if (!result.success) {
-    // 检查是否在构建时（Next.js 构建阶段）
-    const isBuildTime = process.env.NEXT_PHASE === 'build'
+    // 检查是否在构建时（多种构建环境检测）
+    const isBuildTime =
+      // Next.js 构建阶段
+      process.env.NEXT_PHASE === 'build' ||
+      // Vercel 构建环境（检查是否有构建相关的环境变量）
+      process.env.VERCEL === '1' ||
+      process.env.CI === 'true' ||
+      // 或者缺少关键运行时环境变量（DATABASE_URL 和 NEXTAUTH_SECRET 都缺失）
+      (!process.env.DATABASE_URL && !process.env.NEXTAUTH_SECRET)
 
     if (isBuildTime) {
       // 构建时：返回默认值，允许构建继续
