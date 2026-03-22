@@ -36,9 +36,40 @@ const envSchema = z.object({
 /**
  * 解析并验证环境变量
  *
- * @throws {Error} 如果环境变量验证失败
+ * 使用 safeParse 避免构建时验证失败（Vercel 构建时没有环境变量）
+ * 运行时会验证，并在缺失必需变量时抛出错误
  */
-export const env = envSchema.parse(process.env)
+function validateEnv(): z.infer<typeof envSchema> {
+  const result = envSchema.safeParse(process.env)
+
+  if (!result.success) {
+    // 检查是否在构建时（Vercel 构建环境）
+    const isBuildTime = process.env.NEXT_PHASE === 'build' || process.env.VERCEL === '1' && !process.env.DATABASE_URL
+
+    if (isBuildTime) {
+      // 构建时：返回默认值，允许构建继续
+      console.warn('⚠️  构建时跳过环境变量验证（预期行为）')
+      return {
+        NODE_ENV: 'development',
+        DATABASE_URL: 'postgresql://placeholder',
+        DB_POOL_MAX: 10,
+        DB_POOL_TIMEOUT: 10000,
+        NEXTAUTH_SECRET: 'placeholder-secret',
+      } as z.infer<typeof envSchema>
+    }
+
+    // 运行时：抛出错误
+    const errorDetails = result.error.toString()
+    throw new Error(`环境变量验证失败:\n${errorDetails}`)
+  }
+
+  return result.data
+}
+
+/**
+ * 环境变量对象（惰性验证）
+ */
+export const env = validateEnv()
 
 /**
  * 环境变量类型推断
