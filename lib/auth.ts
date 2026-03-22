@@ -16,12 +16,30 @@ import { env } from './env'
  * - session: 会话策略（JWT）
  * - trustHost: 信任主机（开发环境）
  */
+// 验证 Google OAuth 环境变量
+function validateGoogleOAuth() {
+  if (!env.GOOGLE_CLIENT_ID || !env.GOOGLE_CLIENT_SECRET) {
+    const isProduction = env.NODE_ENV === 'production'
+    if (isProduction) {
+      console.error('❌ Google OAuth 环境变量未设置')
+      console.error('请在 Vercel 项目设置中添加以下环境变量：')
+      console.error('  - GOOGLE_CLIENT_ID')
+      console.error('  - GOOGLE_CLIENT_SECRET')
+    }
+  }
+}
+
+// 验证环境（仅在运行时）
+if (typeof window === 'undefined') {
+  validateGoogleOAuth()
+}
+
 export const nextAuthConfig: NextAuthConfig = {
   // 配置 OAuth 提供商
   providers: [
     Google({
-      clientId: env.GOOGLE_CLIENT_ID!,
-      clientSecret: env.GOOGLE_CLIENT_SECRET!,
+      clientId: env.GOOGLE_CLIENT_ID ?? '',
+      clientSecret: env.GOOGLE_CLIENT_SECRET ?? '',
       // 允许测试环境使用 HTTP
       allowDangerousEmailAccountLinking: true,
       // 配置授权参数，强制显示账号选择页面

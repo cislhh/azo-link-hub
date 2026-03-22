@@ -43,8 +43,8 @@ function validateEnv(): z.infer<typeof envSchema> {
   const result = envSchema.safeParse(process.env)
 
   if (!result.success) {
-    // 检查是否在构建时（Vercel 构建环境）
-    const isBuildTime = process.env.NEXT_PHASE === 'build' || process.env.VERCEL === '1' && !process.env.DATABASE_URL
+    // 检查是否在构建时（Next.js 构建阶段）
+    const isBuildTime = process.env.NEXT_PHASE === 'build'
 
     if (isBuildTime) {
       // 构建时：返回默认值，允许构建继续
