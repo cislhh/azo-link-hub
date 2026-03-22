@@ -33,6 +33,24 @@ const envSchema = z.object({
   GOOGLE_CLIENT_SECRET: z.string().optional(),
 })
 
+function resolveAuthEnv(source: NodeJS.ProcessEnv): Record<string, string | undefined> {
+  const resolved: Record<string, string | undefined> = { ...source }
+
+  // NextAuth v5 supports AUTH_* aliases. We normalize here to reduce deploy mistakes.
+  resolved.NEXTAUTH_SECRET = source.NEXTAUTH_SECRET ?? source.AUTH_SECRET
+  resolved.NEXTAUTH_URL = source.NEXTAUTH_URL ?? source.AUTH_URL
+
+  // In Vercel production, derive a safe default when URL is not explicitly provided.
+  if (!resolved.NEXTAUTH_URL && source.NODE_ENV === 'production') {
+    const vercelHost = source.VERCEL_PROJECT_PRODUCTION_URL ?? source.VERCEL_URL
+    if (vercelHost) {
+      resolved.NEXTAUTH_URL = `https://${vercelHost}`
+    }
+  }
+
+  return resolved
+}
+
 /**
  * 解析并验证环境变量
  *
@@ -40,7 +58,8 @@ const envSchema = z.object({
  * 运行时会验证，并在缺失必需变量时抛出错误
  */
 function validateEnv(): z.infer<typeof envSchema> {
-  const result = envSchema.safeParse(process.env)
+  const runtimeEnv = resolveAuthEnv(process.env)
+  const result = envSchema.safeParse(runtimeEnv)
 
   if (!result.success) {
     // 检查是否在构建时（多种构建环境检测）
