@@ -1,4 +1,8 @@
-import { signIn } from '@/lib/auth'
+import { auth, signIn } from '@/lib/auth'
+import { redirect } from 'next/navigation'
+
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
 
 /**
  * 登录页面
@@ -18,6 +22,13 @@ export default async function LoginPage({
   searchParams: Promise<{ callbackUrl?: string }>
 }) {
   const { callbackUrl = '/dashboard' } = await searchParams
+
+  // 检查用户是否已登录
+  const session = await auth()
+  if (session?.user) {
+    // 已登录用户重定向到 dashboard
+    redirect('/dashboard')
+  }
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-linear-to-br from-blue-50 to-indigo-100 px-4">
@@ -47,7 +58,12 @@ export default async function LoginPage({
             <form
               action={async () => {
                 'use server'
-                await signIn('google', { redirectTo: callbackUrl })
+                // NextAuth v5 正确的 signIn 调用方式
+                await signIn('google', undefined, {
+                  redirectTo: callbackUrl,
+                  // 通过 queryParams 传递 prompt 参数
+                  prompt: 'select_account',
+                })
               }}
               className="space-y-4"
             >

@@ -24,6 +24,14 @@ export const nextAuthConfig: NextAuthConfig = {
       clientSecret: env.GOOGLE_CLIENT_SECRET!,
       // 允许测试环境使用 HTTP
       allowDangerousEmailAccountLinking: true,
+      // 配置授权参数，强制显示账号选择页面
+      authorization: {
+        params: {
+          prompt: 'consent',
+          access_type: 'offline',
+          response_type: 'code',
+        },
+      },
     }),
   ],
 

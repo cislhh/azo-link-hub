@@ -138,7 +138,7 @@ export function PublicLinkPage({
       className="min-h-screen flex items-center justify-center p-4"
       style={fillStyle}
     >
-      <div className="w-full max-w-md">
+      <div className="w-full max-w-md animate-in fade-in duration-500">
         {/* 个人信息区域 */}
         <div className="mb-8 flex flex-col items-center">
           {/* 头像 */}
@@ -147,7 +147,8 @@ export function PublicLinkPage({
             <img
               src={avatar || userImage!}
               alt={displayName || username}
-              className="mb-4 h-24 w-24 rounded-full object-cover shadow-lg ring-4 ring-white/50"
+              className="mb-4 h-24 w-24 rounded-full object-cover shadow-lg ring-4 ring-white/50 transition-transform duration-200 hover:scale-105"
+              loading="lazy"
             />
           ) : (
             <div className={`mb-4 flex h-24 w-24 items-center justify-center rounded-full shadow-lg ring-4 ${avatarFallbackClass}`}>
@@ -158,7 +159,7 @@ export function PublicLinkPage({
           )}
 
           {/* 用户名/显示名称 */}
-          <h1 className={`mb-2 text-center text-2xl font-bold ${profileTitleClass}`}>
+          <h1 className={`mb-2 text-center text-2xl font-bold tracking-tight ${profileTitleClass}`}>
             {displayName || username}
           </h1>
 
@@ -183,7 +184,7 @@ export function PublicLinkPage({
                 href={link.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className={`flex items-center gap-3 rounded-lg border px-4 py-3 text-center text-sm font-medium shadow-sm transition-all hover:shadow-md ${cardClass}`}
+                className={`flex items-center gap-3 rounded-lg border px-4 py-3 text-sm font-medium shadow-sm transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 active:translate-y-0 cursor-pointer ${cardClass}`}
                 style={{ marginBottom: `${linkSpacing}px` }}
               >
                 <Icon className="h-5 w-5 flex-shrink-0" />
@@ -199,7 +200,7 @@ export function PublicLinkPage({
               href={link.url}
               target="_blank"
               rel="noopener noreferrer"
-              className={`block rounded-lg border px-4 py-3 text-center text-sm font-medium shadow-sm transition-all hover:shadow-md ${cardClass}`}
+              className={`block rounded-lg border px-4 py-3 text-sm font-medium shadow-sm transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 active:translate-y-0 cursor-pointer ${cardClass}`}
               style={{ marginBottom: `${linkSpacing}px` }}
             >
               {link.title}

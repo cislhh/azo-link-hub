@@ -212,7 +212,7 @@ export function LinkForm({
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
       {/* 基本信息 */}
-      <Card>
+      <Card className="transition-all duration-200 hover:shadow-md">
         <CardHeader>
           <CardTitle>基本信息</CardTitle>
           <CardDescription>设置您的链接页面基本信息</CardDescription>
@@ -220,16 +220,17 @@ export function LinkForm({
         <CardContent className="space-y-4">
           {/* 用户名 */}
           <div className="space-y-2">
-            <Label htmlFor="username">
+            <Label htmlFor="username" className="text-sm font-medium">
               用户名 <span className="text-destructive">*</span>
             </Label>
             <Input
               id="username"
               placeholder="例如: johndoe"
               {...register('username')}
+              className="transition-all duration-200 focus-visible:ring-2 focus-visible:ring-blue-500"
             />
             {errors.username && (
-              <p className="text-sm text-destructive">{errors.username.message}</p>
+              <p className="text-sm text-destructive mt-1" role="alert">{errors.username.message}</p>
             )}
             <p className="text-xs text-muted-foreground">
               3-20个字符，只能包含字母、数字、下划线和连字符
@@ -238,14 +239,15 @@ export function LinkForm({
 
           {/* 显示名称 */}
           <div className="space-y-2">
-            <Label htmlFor="displayName">显示名称</Label>
+            <Label htmlFor="displayName" className="text-sm font-medium">显示名称</Label>
             <Input
               id="displayName"
               placeholder="例如: John Doe"
               {...register('displayName')}
+              className="transition-all duration-200 focus-visible:ring-2 focus-visible:ring-blue-500"
             />
             {errors.displayName && (
-              <p className="text-sm text-destructive">{errors.displayName.message}</p>
+              <p className="text-sm text-destructive mt-1" role="alert">{errors.displayName.message}</p>
             )}
             <p className="text-xs text-muted-foreground">
               1-50个字符，将显示在您的链接页面上
@@ -254,30 +256,32 @@ export function LinkForm({
 
           {/* 简介 */}
           <div className="space-y-2">
-            <Label htmlFor="bio">简介</Label>
+            <Label htmlFor="bio" className="text-sm font-medium">简介</Label>
             <Textarea
               id="bio"
               placeholder="介绍一下您自己..."
               rows={3}
               {...register('bio')}
+              className="transition-all duration-200 focus-visible:ring-2 focus-visible:ring-blue-500 resize-y"
             />
             {errors.bio && (
-              <p className="text-sm text-destructive">{errors.bio.message}</p>
+              <p className="text-sm text-destructive mt-1" role="alert">{errors.bio.message}</p>
             )}
             <p className="text-xs text-muted-foreground">最多500个字符</p>
           </div>
 
           {/* 头像 */}
           <div className="space-y-2">
-            <Label htmlFor="avatar">头像 URL</Label>
+            <Label htmlFor="avatar" className="text-sm font-medium">头像 URL</Label>
             <Input
               id="avatar"
               type="url"
               placeholder="https://example.com/avatar.jpg"
               {...register('avatar')}
+              className="transition-all duration-200 focus-visible:ring-2 focus-visible:ring-blue-500"
             />
             {errors.avatar && (
-              <p className="text-sm text-destructive">{errors.avatar.message}</p>
+              <p className="text-sm text-destructive mt-1" role="alert">{errors.avatar.message}</p>
             )}
             <p className="text-xs text-muted-foreground">
               请输入有效的图片 URL 地址
@@ -287,7 +291,7 @@ export function LinkForm({
       </Card>
 
       {/* 背景设置 */}
-      <Card>
+      <Card className="transition-all duration-200 hover:shadow-md">
         <CardHeader>
           <CardTitle>背景设置</CardTitle>
           <CardDescription>选择您链接页面的背景颜色</CardDescription>
@@ -301,7 +305,7 @@ export function LinkForm({
       </Card>
 
       {/* 社交媒体链接 */}
-      <Card>
+      <Card className="transition-all duration-200 hover:shadow-md">
         <CardHeader>
           <CardTitle>社交媒体链接</CardTitle>
           <CardDescription>添加您的社交媒体账号链接</CardDescription>
@@ -315,7 +319,7 @@ export function LinkForm({
       </Card>
 
       {/* 额外链接 */}
-      <Card>
+      <Card className="transition-all duration-200 hover:shadow-md">
         <CardHeader>
           <CardTitle>额外链接</CardTitle>
           <CardDescription>添加自定义链接到您的页面</CardDescription>

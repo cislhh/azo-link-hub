@@ -2,6 +2,7 @@ import { auth } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 import { getOrCreateUserLink } from './actions'
 import { DashboardClient } from './dashboard-client'
+import { LogoutButton } from '@/components/logout-button'
 
 /**
  * Dashboard 页面
@@ -33,14 +34,7 @@ export default async function DashboardPage() {
               {session.user.name && (
                 <span className="text-sm text-muted-foreground">{session.user.name}</span>
               )}
-              <form action="/api/auth/signout" method="POST">
-                <button
-                  type="submit"
-                  className="rounded-lg border border-border px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-muted"
-                >
-                  登出
-                </button>
-              </form>
+              <LogoutButton />
             </div>
           </div>
         </div>
