@@ -4,6 +4,8 @@ import { getOrCreateUserLink } from './actions'
 import { DashboardClient } from './dashboard-client'
 import { LogoutButton } from '@/components/logout-button'
 
+export const dynamic = 'force-dynamic'
+
 /**
  * Dashboard 页面
  *
